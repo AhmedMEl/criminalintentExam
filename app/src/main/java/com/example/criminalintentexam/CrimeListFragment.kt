@@ -1,5 +1,6 @@
 package com.example.criminalintentexam
 
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,6 +14,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import java.util.*
 
 private const val TAG = "CrimeListFragment"
 class CrimeListFragment : Fragment() {
@@ -20,6 +22,11 @@ class CrimeListFragment : Fragment() {
     private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
     private val crimeListViewModel: CrimeListViewModel by lazy {
         ViewModelProviders.of(this).get(CrimeListViewModel::class.java)
+    }
+    var callBacks:CallBacks?= null
+
+    interface CallBacks{
+        fun onItemSelected(crimeId:UUID)
     }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,12 +38,12 @@ class CrimeListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_crime_list, container, false)
-        crimeRecyclerView =
-            view.findViewById(R.id.crime_recycler_view) as RecyclerView
+        crimeRecyclerView = view.findViewById(R.id.crime_recycler_view) as RecyclerView
         crimeRecyclerView.layoutManager = LinearLayoutManager(context)
         crimeRecyclerView.adapter = adapter
         return view
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         crimeListViewModel.crimeListLiveData.observe(
@@ -80,7 +87,13 @@ class CrimeListFragment : Fragment() {
             }
         }
         override fun onClick(v: View) {
-            Toast.makeText(context, "${crime.title} pressed!", Toast.LENGTH_SHORT).show()
+//            val fragment = CrimeFragment()
+//            val fm = activity?.supportFragmentManager
+//            fm?.beginTransaction()
+//                ?.replace(R.id.fragment_container, fragment)
+//                ?.commit()
+            callBacks?.onItemSelected(crime.id)
+
         }
     }
     private inner class CrimeAdapter(var crimes: List<Crime>)
@@ -95,6 +108,16 @@ class CrimeListFragment : Fragment() {
             val crime = crimes[position]
             holder.bind(crime)
         }
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        callBacks=context as CallBacks?
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        callBacks=null
     }
 
 }
