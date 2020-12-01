@@ -14,15 +14,19 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import java.util.*
 import androidx.lifecycle.Observer
+import java.text.SimpleDateFormat
 
 
 private const val DIALOG_DATE = "DialogDate"
+private const val DIALOG_TIME = "DialogTime"
 private const val REQUEST_DATE = 0
-class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
+private const val REQUEST_TIME = 1
+class CrimeFragment : Fragment(), DatePickerFragment.Callbacks,TimePickerFragment.Callbacks {
 
     private lateinit var crime: Crime
     private lateinit var titleField: EditText
     private lateinit var dateButton: Button
+    private lateinit var timeButton: Button
     private lateinit var solvedCheckBox: CheckBox
     private val crimeDetailViewModel: CrimeDetailViewModel by lazy {
         ViewModelProviders.of(this).get(CrimeDetailViewModel::class.java)
@@ -68,6 +72,7 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
         val view = inflater.inflate(R.layout.fragment_crime,container, false)
         titleField = view.findViewById(R.id.crime_title)
         dateButton = view.findViewById(R.id.crime_date)
+        timeButton= view.findViewById(R.id.crime_time)
         solvedCheckBox = view.findViewById(R.id.crime_solved)
 //        dateButton.apply {
 //            text = crime.date.toString()
@@ -113,6 +118,12 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
                 show(this@CrimeFragment.requireFragmentManager(), DIALOG_DATE)
             }
         }
+        timeButton.setOnClickListener {
+            TimePickerFragment.newInstance(crime.date).apply {
+                setTargetFragment(this@CrimeFragment, REQUEST_TIME)
+                show(this@CrimeFragment.requireFragmentManager(), DIALOG_TIME)
+            }
+        }
     }
     override fun onStop() {
         super.onStop()
@@ -134,5 +145,10 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
         updateUI()
     }
 
+    override fun onTimeSelected(time: Date) {
+        val timeFormatAmPm = SimpleDateFormat("hh:mm aa")
+        val times=timeFormatAmPm.format(time)
+        timeButton.text=times
+    }
 
 }
